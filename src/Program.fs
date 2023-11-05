@@ -29,7 +29,7 @@ let parseFile() =
         let structs = getStructs lines
         let functions = getFunctions lines
         let enums_c, structs_c, fns_c = (enums.Count(), structs.Count(), functions.Count())
-        stdout $"{enums_c}, {structs_c}, {fns_c}"
+        stdout $"enums: {enums_c}, structs: {structs_c}, functions: {fns_c}"
 
         let filename = 
             match generator with
@@ -45,12 +45,23 @@ let parseFile() =
             enums |> Seq.map (fun e -> FSharp.transformEnum e sb) |> Seq.iter (fun e -> fs.WriteLine(e))
             structs |> Seq.map (fun s -> FSharp.transformStruct s sb) |> Seq.iter (fun s -> fs.WriteLine(s))
             functions |> Seq.map (fun f -> FSharp.transformFunction f sb) |> Seq.iter (fun f -> fs.WriteLine(f))
+            openDoc ".fs" args[1]
+            |> documentEnums enums
+            |> documentStructs structs
+            |> FSharp.documentFunctions functions
+            |> closeDoc
+            
         | "-cs" -> do
             sb |> CSharp.writeTemplate libname |> string |> fs.WriteLine
             enums |> Seq.map (fun e -> CSharp.transformEnum e sb) |> Seq.iter (fun e -> fs.WriteLine(e))
             structs |> Seq.map (fun s -> CSharp.transformStruct s sb) |> Seq.iter (fun s -> fs.WriteLine(s))
             functions |> Seq.map (fun f -> CSharp.transformFunction f sb) |> Seq.iter (fun f -> fs.WriteLine(f))
             fs.WriteLine("}")           
+            openDoc ".cs" args[1]
+            |> documentEnums enums
+            |> documentStructs structs
+            |> CSharp.documentFunctions functions
+            |> closeDoc
         | _ -> raise (invalidArg "-generator" $"invalid type {generator}")
         
         fs.Flush()             

@@ -389,4 +389,14 @@ using System.Diagnostics;
         else sb |> appendln ");" |> string
 
   
-
+    let documentFunctions (functions: seq<string array>) (writer: StringBuilder * StreamWriter) =
+        let sb, _ = writer
+        // gets a sequence of the bindings functions names
+        let functions' = 
+            functions
+            |> Seq.map (fun f -> transformFunction f sb)
+            |> Seq.map (fun s -> s.Split('\n') |> Array.filter (fun s -> s.Contains("extern")))
+            |> Seq.reduce Array.append
+            |> Seq.map (fun s -> s.Replace("extern", ""))
+        documentFunctions2 functions functions' writer
+        

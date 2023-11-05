@@ -280,12 +280,73 @@ module Core =
 
     let functionWrite (entry: string array) =
         append "    <dt><code>" 
-        >> append ((fnDefinition entry).TrimEnd('{'))
+        >> append (((fnDefinition entry).TrimEnd('{')).Replace("export", ""))
         >> appendln "</code><dt>" 
         >> append "    <dd>"
         >> writeComments entry
         >> appendln "    </dd>\n"
 
+    /// writes the functions, based on a ready to copy definition
+    let functionWrite2 (entry: string array) (definitionStr: string) =
+        append "    <dt><code>" 
+        >> append definitionStr
+        >> appendln "</code><dt>" 
+        >> append "    <dd>"
+        >> writeComments entry
+        >> appendln "    </dd>\n"
+
+    /// pass the extension and the filepath of the source to parse the content
+    let openDoc (extension: string) (filepath: string) =
+        let lines = readLines filepath
+        let name = suffix filepath
+        let path = name[0..^4] + (extension[1..]).ToUpper() + "_documentation.html"
+        let fs = File.CreateText(path)
+        let sb = new StringBuilder(1024 * 3)
+        fs.WriteLine(doctype)
+        fs.WriteLine(style)
+        sb, fs
+
+
+    let closeDoc (writer: StringBuilder * StreamWriter) =
+        let sb, fs = writer
+        fs.WriteLine(closedoc)
+        fs.Flush()        
+        fs.Dispose()
+        fs.Close()
+        
+
+    let documentEnums (enums: seq<string array>) (writer: StringBuilder * StreamWriter) =        
+        let sb, fs = writer
+        sb |> clear |> headerWrite "Enums" 3 |> appendln "<ul>" |> ignore
+        enums |> Seq.iter (fun enum -> ignore (typeWrite enum sb))
+        sb |> appendln "</ul>" |> string |> fs.WriteLine
+        sb, fs
+        
+
+    let documentStructs (structs: seq<string array>) (writer: StringBuilder * StreamWriter) =
+        let sb, fs = writer
+        sb |> clear |> headerWrite "Structs" 3 |> appendln "<ul>" |> ignore
+        structs |> Seq.iter (fun strct -> ignore (typeWrite strct sb))
+        sb |> appendln "</ul>" |> string |> fs.WriteLine
+        sb, fs
+        
+
+    let documentFunctions (functions: seq<string array>) (writer: StringBuilder * StreamWriter) =
+        let sb, fs = writer
+        sb |> clear |> headerWrite "Functions" 3 |> appendln "<dl>" |> ignore
+        functions |> Seq.iter (fun fn -> ignore (functionWrite fn sb))
+        sb |> appendln "</dl>" |> string |> fs.WriteLine
+        sb, fs
+        
+
+    /// more versatile approach, where it uses the provided function
+    /// definitions to write
+    let documentFunctions2 (functions: seq<string array>) (functions': seq<string>) (writer: StringBuilder * StreamWriter) =
+        let sb, fs = writer
+        sb |> clear |> headerWrite "Functions" 3 |> appendln "<dl>" |> ignore
+        (functions, functions') ||> Seq.zip |> Seq.iter (fun fns -> ignore (functionWrite2 (fst fns) (snd fns) sb))
+        sb |> appendln "</dl>" |> string |> fs.WriteLine
+        sb, fs
 
     let documentation (filepath: string) =
         let lines = readLines filepath
@@ -299,24 +360,11 @@ module Core =
 
         fs.Write(doctype)
         fs.Write(style)
-
-        sb |> headerWrite "Enums" 3 |> appendln "<ul>" |> ignore
-        for enum in enums do
-            ignore (typeWrite enum sb)
-        sb |> appendln "</ul>" |> ignore
-
-        sb |> headerWrite "Structs" 3 |> appendln "<ul>" |> ignore
-        for strct in structs do
-            ignore (typeWrite strct sb)
-        sb |> appendln "</ul>" |> ignore
-
-        sb |> headerWrite "Functions" 3 |> appendln "<dt>" |> ignore
-        for fn in functions do
-            ignore (functionWrite fn sb)
-        sb |> appendln "</dt>" |> ignore
-        
-        fs.Write(sb.ToString())
-        fs.Write(closedoc)
-        
+                
+        (sb, fs) 
+        |> documentEnums enums 
+        |> documentStructs structs 
+        |> documentFunctions functions 
+        |> closeDoc
         
         
