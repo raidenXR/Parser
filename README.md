@@ -22,4 +22,5 @@ otherwise it can run as \
 `./Parser "../src_file.zig"`  
 to create a '.html' documentation of the `.zig` source file 
 
-TODO: implement a '.html' documentation for the generated bindings file.
+~~TODO: implement a '.html' documentation for the generated bindings file.~~ \
+Update: now it creates a `.html` documentation file for the bindings (both F# and C#)
