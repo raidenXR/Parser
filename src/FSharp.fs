@@ -180,7 +180,7 @@ module FSharp =
         sb 
         |> clear 
         |> copy comments
-        |> appendln $"    type {decl} = {{"
+        |> appendln $"    type {decl} = "
         |> ignore
         
         let mutable value = 0
@@ -189,7 +189,7 @@ module FSharp =
                 let name = line.Trim().TrimEnd(',') |> upper
                 sb |> appendln $"        | {name} = {value}" |> ignore
                 value <- value + 1
-        sb |> appendln "    }" |> string
+        string sb
                 
 
 
