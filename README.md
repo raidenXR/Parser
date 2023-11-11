@@ -19,20 +19,6 @@ In terminal run `./Parser [source-file] [libname] [-fs|cs] [destination]`
 i.e. `./Parser "../src_file.zig" "libname.dll" -fs "../directory/"` 
 
 
-TODO: update the src 
-TODO: generate simple .html documentation. A table with name definitions - declaration and description
-TODO: assign as [<Obsolete>] the old functions
+Or run simply as `./Parser "../src_file.zig"` to generate a `.html` with the zig source file declarations. \
+Among the .cs / .fs bindings file, a `.html` documentation file will be generated too.
 
-
-open System
-
-[<Obsolete("Do not use. Use newFunction instead.")>]
-let obsoleteFunction x y =
-  x + y
-
-let newFunction x y =
-  x + 2 * y
-
-// The use of the obsolete function produces a warning.
-let result1 = obsoleteFunction 10 100
-let result2 = newFunction 10 100
