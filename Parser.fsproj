@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>    
+    <LangVersion>preview</LangVersion>
+    <PublishAot>true</PublishAot>
+    <StripSymbols>true</StripSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/Core.fs" />
+    <Compile Include="src/CSharp.fs" />
+    <Compile Include="src/FSharp.fs" />
+    <!-- Compile Include="src/Tests.fs" /  -->
+    <Compile Include="src/Program.fs" />
+  </ItemGroup>
+
+
+</Project>
